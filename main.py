@@ -15,19 +15,30 @@ mastodon = Mastodon(
 )
 
 #get account id
-followering = mastodon.account_following(110090602223960345)
+followering = mastodon.account_following(110209472762362718)
 with open("jokes.txt", "r") as f:
     jokes = f.readlines()
 
-jokes = []
+
+followering_posts = []
+
+for i in followering:
+    for post in mastodon.account_statuses(i):
+        followering_posts.append(post.id)
+
+print(followering_posts)
+
 
 while True:
-    #if a follower creats a new post
-    for follower in followering:
-        follower_posts = mastodon.account_statuses(follower.id)
-        for post in follower_posts:
-            if post.favourited == False:
-                #like the post
-                mastodon.status_favourite(post.id)
-                #reply to the post
-                mastodon.status_post("@" + post.account.acct + " " + random.choice(["Hello", "Hi", "Hey", "Greetings"]), in_reply_to_id=post.id)
+    #check if there are new posts
+    for i in followering:
+        for post in mastodon.account_statuses(i):
+            if post.id not in followering_posts:
+                followering_posts.append(post.id)
+                print("New post")
+                selected_joke = random.choice(jokes)
+                mastodon.status_post(selected_joke, in_reply_to_id=post.id)
+
+    time.sleep(60)
+
+    
